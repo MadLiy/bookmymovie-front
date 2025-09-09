@@ -1,9 +1,24 @@
 pipeline {
     agent { label 'build-heavy' }
     stages {
-        stage('Test') {
+        stage('Build Front') {
             steps {
-                echo "Hello from Front pipeline"
+                echo "Build front..."
+            }
+            stage('Checkout') {
+                steps {
+                    checkout scm
+                }
+            }
+            stage('Install Dependencies') {
+                steps {
+                    sh 'npm install'
+                }
+            }
+            stage('Build') {
+                steps {
+                    sh 'npm run build'
+                }
             }
         }
     }
