@@ -1,25 +1,43 @@
 pipeline {
-    agent { label 'build-heavy' }
+    agent any
+
     stages {
-        stage('Build Front') {
+        stage('Checkout') {
             steps {
-                echo "Build front..."
+                checkout scm
             }
-            stage('Checkout') {
-                steps {
-                    checkout scm
+        }
+
+        stage('Install') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Tests') {
+            steps {
+                sh 'npm test -- --ci --reporters=jest-junit'
+            }
+            post {
+                always {
+                    junit 'junit.xml'
                 }
             }
-            stage('Install Dependencies') {
-                steps {
-                    sh 'npm install'
-                }
-            }
-            stage('Build') {
-                steps {
-                    sh 'npm run build'
-                }
-            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Frontend build & tests succeeded"
+        }
+        failure {
+            echo "❌ Frontend pipeline failed"
         }
     }
 }
